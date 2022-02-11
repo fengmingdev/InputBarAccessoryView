@@ -16,6 +16,7 @@ enum InputBarStyle: String, CaseIterable {
     case githawk = "GitHawk"
     case facebook = "Facebook"
     case noTextView = "No InputTextView"
+    case custom = "custom"
     case `default` = "Default"
     
     func generate() -> InputBarAccessoryView {
@@ -25,7 +26,9 @@ enum InputBarStyle: String, CaseIterable {
         case .githawk: return GitHawkInputBar()
         case .facebook: return FacebookInputBar()
         case .noTextView: return NoTextViewInputBar()
+        case .custom: return SlackInputBar()
         case .default: return InputBarAccessoryView()
         }
     }
 }
+

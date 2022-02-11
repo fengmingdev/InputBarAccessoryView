@@ -42,6 +42,8 @@
 		38F0C1F220C7807D00FF8DD3 /* AutocompleteSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F0C1F120C7807D00FF8DD3 /* AutocompleteSession.swift */; };
 		38F0C1F420C7808F00FF8DD3 /* AutocompleteCompletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F0C1F320C7808F00FF8DD3 /* AutocompleteCompletion.swift */; };
 		38F0C1FB20C8971500FF8DD3 /* InputBarAccessoryView+Availability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 38F0C1FA20C8971500FF8DD3 /* InputBarAccessoryView+Availability.swift */; };
+		81A65DEB27B661B000B78129 /* CustomManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A65DE827B661B000B78129 /* CustomManager.swift */; };
+		81A65DEC27B661B000B78129 /* CustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 81A65DEA27B661B000B78129 /* CustomView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -94,6 +96,8 @@
 		38F0C1F320C7808F00FF8DD3 /* AutocompleteCompletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteCompletion.swift; sourceTree = "<group>"; };
 		38F0C1FA20C8971500FF8DD3 /* InputBarAccessoryView+Availability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "InputBarAccessoryView+Availability.swift"; sourceTree = "<group>"; };
 		51E04F3E24F7DCD0004D7452 /* Example.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = Example.xcodeproj; path = Example/Example.xcodeproj; sourceTree = "<group>"; };
+		81A65DE827B661B000B78129 /* CustomManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomManager.swift; sourceTree = "<group>"; };
+		81A65DEA27B661B000B78129 /* CustomView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -146,6 +150,7 @@
 		3876DA8C1F8352F800C89326 /* Plugins */ = {
 			isa = PBXGroup;
 			children = (
+				81A65DE727B661B000B78129 /* CustomManager */,
 				38F0C1ED20C7802300FF8DD3 /* AutocompleteManager */,
 				38F0C1EE20C7802B00FF8DD3 /* AttachmentManager */,
 			);
@@ -312,6 +317,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		81A65DE727B661B000B78129 /* CustomManager */ = {
+			isa = PBXGroup;
+			children = (
+				81A65DE827B661B000B78129 /* CustomManager.swift */,
+				81A65DE927B661B000B78129 /* View */,
+			);
+			path = CustomManager;
+			sourceTree = "<group>";
+		};
+		81A65DE927B661B000B78129 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				81A65DEA27B661B000B78129 /* CustomView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -428,8 +450,10 @@
 				389C571622C8557D00D78F87 /* HorizontalEdgePadding.swift in Sources */,
 				388B31D921EA9928000EEE45 /* String+Extensions.swift in Sources */,
 				3876DAAB1F84C22100C89326 /* AttachmentCell.swift in Sources */,
+				81A65DEB27B661B000B78129 /* CustomManager.swift in Sources */,
 				3821ADE820F54B3700DE0D1D /* NSMutableAttributedString+Extensions.swift in Sources */,
 				38C867821F50A6AD00811974 /* InputBarAccessoryView.swift in Sources */,
+				81A65DEC27B661B000B78129 /* CustomView.swift in Sources */,
 				38570138218651C400589A30 /* InputBarSendButton.swift in Sources */,
 				3876DAB11F84D9DB00C89326 /* AutocompleteTableView.swift in Sources */,
 				381042271F87FDE500B1E61A /* AttachmentManagerDelegate.swift in Sources */,

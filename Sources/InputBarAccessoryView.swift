@@ -122,7 +122,20 @@ open class InputBarAccessoryView: UIView {
      2. It's spacing is initially set to 15
      */
     public let bottomStackView = InputStackView(axis: .horizontal, spacing: 15)
-
+    
+    /**
+     The InputStackView at the InputStackView.top position
+     
+     ## Important Notes ##
+     1. It's axis is initially set to .vertical
+     2. It's alignment is initially set to .fill
+     */
+    public let bottomEndStackView: InputStackView = {
+        let stackView = InputStackView(axis: .vertical, spacing: 0)
+        stackView.alignment = .fill
+        return stackView
+    }()
+    
     /**
      The main view component of the InputBarAccessoryView
 
@@ -230,6 +243,11 @@ open class InputBarAccessoryView: UIView {
         }
     }
     
+    open var bottomEndStackViewPadding: UIEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: 0) {
+        didSet {
+            updateBottomEndStackViewPadding()
+        }
+    }
     /**
      The anchor constants used by the middleContentView
      
@@ -330,6 +348,9 @@ open class InputBarAccessoryView: UIView {
     /// The InputBarItems held in the bottomStackView
     public private(set) var bottomStackViewItems: [InputItem] = []
     
+    /// The InputBarItems held in the bottomEndStackView
+    public private(set) var bottomEndStackViewItems: [InputItem] = []
+    
     /// The InputBarItems held in the topStackView
     public private(set) var topStackViewItems: [InputItem] = []
     
@@ -338,7 +359,12 @@ open class InputBarAccessoryView: UIView {
     
     /// Returns a flatMap of all the items in each of the UIStackViews
     public var items: [InputItem] {
-        return [leftStackViewItems, rightStackViewItems, bottomStackViewItems, topStackViewItems, nonStackViewItems].flatMap { $0 }
+        return [leftStackViewItems,
+                rightStackViewItems,
+                topStackViewItems,
+                bottomStackViewItems,
+                bottomEndStackViewItems,
+                nonStackViewItems].flatMap { $0 }
     }
 
     // MARK: - Auto-Layout Constraint Sets
@@ -349,6 +375,7 @@ open class InputBarAccessoryView: UIView {
     private var leftStackViewLayoutSet: NSLayoutConstraintSet?
     private var rightStackViewLayoutSet: NSLayoutConstraintSet?
     private var bottomStackViewLayoutSet: NSLayoutConstraintSet?
+    private var bottomEndStackViewLayoutSet: NSLayoutConstraintSet?
     private var contentViewLayoutSet: NSLayoutConstraintSet?
     private var windowAnchor: NSLayoutConstraint?
     private var backgroundViewLayoutSet: NSLayoutConstraintSet?
@@ -440,6 +467,7 @@ open class InputBarAccessoryView: UIView {
         contentView.addSubview(bottomStackView)
         middleContentViewWrapper.addSubview(inputTextView)
         middleContentView = inputTextView
+        addSubview(bottomEndStackView)
         setStackViewItems([sendButton], forStack: .right, animated: false)
     }
     
@@ -465,7 +493,7 @@ open class InputBarAccessoryView: UIView {
         
         contentViewLayoutSet = NSLayoutConstraintSet(
             top:    contentView.topAnchor.constraint(equalTo: topStackView.bottomAnchor, constant: padding.top),
-            bottom: contentView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -padding.bottom),
+            bottom: contentView.bottomAnchor.constraint(equalTo: bottomEndStackView.topAnchor, constant: 0),
             left:   contentView.leftAnchor.constraint(equalTo: safeAreaLayoutGuide.leftAnchor, constant: padding.left + frameInsets.left),
             right:  contentView.rightAnchor.constraint(equalTo: safeAreaLayoutGuide.rightAnchor, constant: -(padding.right + frameInsets.right))
         )
@@ -501,6 +529,13 @@ open class InputBarAccessoryView: UIView {
             bottom: bottomStackView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: 0),
             left:   bottomStackView.leftAnchor.constraint(equalTo: contentView.leftAnchor, constant: 0),
             right:  bottomStackView.rightAnchor.constraint(equalTo: contentView.rightAnchor, constant: 0)
+        )
+        
+        bottomEndStackViewLayoutSet = NSLayoutConstraintSet(
+            top:    bottomEndStackView.topAnchor.constraint(equalTo: contentView.bottomAnchor, constant: bottomEndStackViewPadding.top),
+            bottom: bottomEndStackView.bottomAnchor.constraint(equalTo: safeAreaLayoutGuide.bottomAnchor, constant: -padding.bottom),
+            left:   bottomEndStackView.leftAnchor.constraint(equalTo: safeAreaLayoutGuide.leftAnchor, constant: bottomEndStackViewPadding.left + frameInsets.left),
+            right:  bottomEndStackView.rightAnchor.constraint(equalTo: safeAreaLayoutGuide.rightAnchor, constant: -(bottomEndStackViewPadding.right + frameInsets.right))
         )
     }
     
@@ -552,6 +587,13 @@ open class InputBarAccessoryView: UIView {
         topStackViewLayoutSet?.left?.constant = topStackViewPadding.left + frameInsets.left
         topStackViewLayoutSet?.right?.constant = -(topStackViewPadding.right + frameInsets.right)
     }
+    
+    /// Updates the constraint constants that correspond to the topStackViewPadding UIEdgeInsets
+    private func updateBottomEndStackViewPadding() {
+        bottomEndStackViewLayoutSet?.top?.constant = bottomEndStackViewPadding.top
+        bottomEndStackViewLayoutSet?.left?.constant = bottomEndStackViewPadding.left + frameInsets.left
+        bottomEndStackViewLayoutSet?.right?.constant = -(bottomEndStackViewPadding.right + frameInsets.right)
+    }
 
     /// Invalidates the view’s intrinsic content size
     open override func invalidateIntrinsicContentSize() {
@@ -587,9 +629,14 @@ open class InputBarAccessoryView: UIView {
         
         // Calculate the required height
         let totalPadding = padding.top + padding.bottom + topStackViewPadding.top + middleContentViewPadding.top + middleContentViewPadding.bottom
+        
         let topStackViewHeight = topStackView.arrangedSubviews.count > 0 ? topStackView.bounds.height : 0
+        
         let bottomStackViewHeight = bottomStackView.arrangedSubviews.count > 0 ? bottomStackView.bounds.height : 0
-        let verticalStackViewHeight = topStackViewHeight + bottomStackViewHeight
+        
+        let bottomEndStackViewHeight = bottomEndStackView.arrangedSubviews.count > 0 ? bottomEndStackView.bounds.height : 0
+        
+        let verticalStackViewHeight = topStackViewHeight + bottomStackViewHeight + bottomEndStackViewHeight
         let requiredHeight = inputTextViewHeight + totalPadding + verticalStackViewHeight
         return CGSize(width: UIView.noIntrinsicMetric, height: requiredHeight)
     }
@@ -624,7 +671,7 @@ open class InputBarAccessoryView: UIView {
     /// Layout the given InputStackView's
     ///
     /// - Parameter positions: The InputStackView's to layout
-    public func layoutStackViews(_ positions: [InputStackView.Position] = [.left, .right, .bottom, .top]) {
+    public func layoutStackViews(_ positions: [InputStackView.Position] = [.left, .right, .top, .bottom, .bottomEnd]) {
         
         guard superview != nil else { return }
         for position in positions {
@@ -635,12 +682,15 @@ open class InputBarAccessoryView: UIView {
             case .right:
                 rightStackView.setNeedsLayout()
                 rightStackView.layoutIfNeeded()
-            case .bottom:
-                bottomStackView.setNeedsLayout()
-                bottomStackView.layoutIfNeeded()
             case .top:
                 topStackView.setNeedsLayout()
                 topStackView.layoutIfNeeded()
+            case .bottom:
+                bottomStackView.setNeedsLayout()
+                bottomStackView.layoutIfNeeded()
+            case .bottomEnd:
+                bottomEndStackView.setNeedsLayout()
+                bottomEndStackView.layoutIfNeeded()
             }
         }
     }
@@ -670,6 +720,7 @@ open class InputBarAccessoryView: UIView {
         leftStackViewLayoutSet?.activate()
         rightStackViewLayoutSet?.activate()
         bottomStackViewLayoutSet?.activate()
+        bottomEndStackViewLayoutSet?.activate()
         topStackViewLayoutSet?.activate()
     }
     
@@ -681,6 +732,7 @@ open class InputBarAccessoryView: UIView {
         leftStackViewLayoutSet?.deactivate()
         rightStackViewLayoutSet?.deactivate()
         bottomStackViewLayoutSet?.deactivate()
+        bottomEndStackViewLayoutSet?.deactivate()
         topStackViewLayoutSet?.deactivate()
     }
 
@@ -708,7 +760,7 @@ open class InputBarAccessoryView: UIView {
     /// Removes all of the arranged subviews from the InputStackView and adds the given items.
     /// Sets the inputBarAccessoryView property of the InputBarButtonItem
     ///
-    /// Note: If you call `animated = true`, the `items` property of the stack view items will not be updated until the 
+    /// Note: If you call `animated = true`, the `items` property of the stack view items will not be updated until the
     /// views are done being animated. If you perform a check for the items after they're set, setting animated to `false`
     /// will apply the body of the closure immediately.
     ///
@@ -747,18 +799,6 @@ open class InputBarAccessoryView: UIView {
                 }
                 guard superview != nil else { return }
                 rightStackView.layoutIfNeeded()
-            case .bottom:
-                bottomStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-                bottomStackViewItems = items
-                bottomStackViewItems.forEach {
-                    $0.inputBarAccessoryView = self
-                    $0.parentStackViewPosition = position
-                    if let view = $0 as? UIView {
-                        bottomStackView.addArrangedSubview(view)
-                    }
-                }
-                guard superview != nil else { return }
-                bottomStackView.layoutIfNeeded()
             case .top:
                 topStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
                 topStackViewItems = items
@@ -771,6 +811,30 @@ open class InputBarAccessoryView: UIView {
                 }
                 guard superview != nil else { return }
                 topStackView.layoutIfNeeded()
+            case .bottom:
+                bottomStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+                bottomStackViewItems = items
+                bottomStackViewItems.forEach {
+                    $0.inputBarAccessoryView = self
+                    $0.parentStackViewPosition = position
+                    if let view = $0 as? UIView {
+                        bottomStackView.addArrangedSubview(view)
+                    }
+                }
+                guard superview != nil else { return }
+                bottomStackView.layoutIfNeeded()
+            case .bottomEnd:
+                bottomEndStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+                bottomEndStackViewItems = items
+                bottomEndStackViewItems.forEach {
+                    $0.inputBarAccessoryView = self
+                    $0.parentStackViewPosition = position
+                    if let view = $0 as? UIView {
+                        bottomEndStackView.addArrangedSubview(view)
+                    }
+                }
+                guard superview != nil else { return }
+                bottomEndStackView.layoutIfNeeded()
             }
             invalidateIntrinsicContentSize()
         }
@@ -787,7 +851,7 @@ open class InputBarAccessoryView: UIView {
     ///   - animated: If the layout should be animated
     ///   - extraAnimations: Any extra operations that should also be animated
     open func setLeftStackViewWidthConstant(to newValue: CGFloat, animated: Bool, animations : (() -> Void)? = nil) {
-        performLayout(animated) { 
+        performLayout(animated) {
             self.leftStackViewWidthConstant = newValue
             self.layoutStackViews([.left])
             self.layoutContainerViewIfNeeded()
@@ -802,7 +866,7 @@ open class InputBarAccessoryView: UIView {
     ///   - animated: If the layout should be animated
     ///   - extraAnimations: Any extra operations that should also be animated
     open func setRightStackViewWidthConstant(to newValue: CGFloat, animated: Bool, animations : (() -> Void)? = nil) {
-        performLayout(animated) { 
+        performLayout(animated) {
             self.rightStackViewWidthConstant = newValue
             self.layoutStackViews([.right])
             self.layoutContainerViewIfNeeded()
