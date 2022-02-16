@@ -49,7 +49,7 @@ open class InputTextView: UITextView {
     
     open override var attributedText: NSAttributedString! {
         didSet {
-            textViewTextDidChange()
+            postTextViewDidChangeNotification()
         }
     }
     
